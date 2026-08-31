@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}สมัครทีม | NT Drone{% endblock %}
+{% block content %}
+<section class="auth-shell shell">
+  <div class="auth-intro">
+    <span class="eyebrow">01 — REGISTRATION</span>
+    <h1>สมัครทีมและส่งเอกสาร</h1>
+    <p>ระบบจะสร้าง Team ID และส่งคำขอให้ Admin ตรวจสอบ เมื่ออนุมัติแล้วหัวหน้าทีมจึงเข้าสู่ระบบ ตั้งค่า 2FA และเพิ่มสมาชิกได้</p>
+    <div class="info-panel">
+      <strong>เงื่อนไขหลัก</strong>
+      <ul><li>สมาชิกทีม 2–4 คน รวมหัวหน้าทีม</li><li>เอกสาร PDF, PNG หรือ JPG ไม่เกิน 10 MB</li><li>รหัสผ่านขั้นต่ำ 12 ตัว พร้อมตัวเล็ก ใหญ่ เลข และอักขระพิเศษ</li></ul>
+    </div>
+  </div>
+  <form class="panel form-grid" action="/portal/register" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="form-section-title"><span>TEAM PROFILE</span><h2>ข้อมูลทีม</h2></div>
+    <label class="field field-wide"><span>ชื่อทีม</span><input name="team_name" required maxlength="160" placeholder="เช่น NT Autonomous Flight"></label>
+    <label class="field"><span>มหาวิทยาลัย / องค์กร</span><input name="institution" required maxlength="200"></label>
+    <label class="field"><span>คณะ / หน่วยงาน</span><input name="faculty" maxlength="200"></label>
+    <div class="form-section-title field-wide"><span>TEAM LEADER</span><h2>ข้อมูลหัวหน้าทีม</h2></div>
+    <label class="field"><span>ชื่อ–นามสกุล</span><input name="leader_name" required maxlength="200"></label>
+    <label class="field"><span>เบอร์โทรศัพท์</span><input name="phone" required maxlength="40"></label>
+    <label class="field"><span>E-mail</span><input type="email" name="email" required maxlength="255"></label>
+    <label class="field"><span>Username</span><input name="username" required pattern="[A-Za-z0-9._-]+" maxlength="80"></label>
+    <label class="field field-wide"><span>Password</span><input type="password" name="password" required minlength="12" autocomplete="new-password"></label>
+    <label class="field field-wide upload-field"><span>เอกสารประกอบการสมัคร</span><input type="file" name="document" accept=".pdf,.png,.jpg,.jpeg" required><small>ระบบเก็บแยกตาม Team ID</small></label>
+    <button class="button button-primary field-wide" type="submit">ส่งคำขอสมัครทีม</button>
+  </form>
+</section>
+{% endblock %}

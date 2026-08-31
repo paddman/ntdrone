@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block title %}เกิดข้อผิดพลาด | NT Drone{% endblock %}
+{% block content %}
+<section class="error-shell shell"><div class="panel"><span class="error-code">{{ status_code }}</span><h1>ระบบดำเนินการไม่สำเร็จ</h1><p>{{ detail }}</p><a class="button button-primary" href="/">กลับหน้าแรก</a></div></section>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/app.css') }}">
+  <script src="{{ url_for('static', path='/app.js') }}" defer></script>
+</head>
+<body>
+  <div class="top-line"></div>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="NT Drone home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img"><path d="M24 7 38 15v18L24 41 10 33V15z"/><circle cx="24" cy="24" r="6"/><path d="M5 13h12M31 13h12M5 35h12M31 35h12"/></svg>
+      </span>
+      <span><strong>NT Drone</strong><small>Competition Portal</small></span>
+    </a>
+    <nav class="nav-links" aria-label="เมนูหลัก">
+      <a href="/">หน้าแรก</a>
+      <a href="/docs">API Docs</a>
+      {% if user %}
+        <a href="{% if user.role == 'ADMIN' %}/admin{% else %}/dashboard{% endif %}">Dashboard</a>
+        <form action="/portal/logout" method="post" class="inline-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="button button-ghost button-small" type="submit">ออกจากระบบ</button>
+        </form>
+      {% else %}
+        <a href="/login">เข้าสู่ระบบ</a>
+        <a class="button button-primary button-small" href="/register">สมัครทีม</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if message %}<div class="flash flash-success" role="status">{{ message }}</div>{% endif %}
+  {% if error %}<div class="flash flash-error" role="alert">{{ error }}</div>{% endif %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="site-footer">
+    <div><strong>NT Drone Competition Portal</strong><span>Register • Approve • Login + 2FA • Booking • VPN • Simulation</span></div>
+    <div>Internal LAN 192.168.248.0/24</div>
+  </footer>
+</body>
+</html>

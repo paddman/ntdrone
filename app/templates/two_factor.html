@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}ยืนยัน 2FA | NT Drone{% endblock %}
+{% block content %}
+<section class="twofa-shell shell">
+  <div class="panel twofa-panel">
+    <span class="eyebrow">TWO-FACTOR AUTHENTICATION</span>
+    {% if setup_required %}
+      <h1>ตั้งค่า Google Authenticator</h1>
+      <p>สแกน QR Code หรือกรอก Secret จากนั้นใส่รหัส 6 หลักเพื่อเปิดใช้งาน 2FA</p>
+      <div class="qr-box"><img src="{{ qr_data_uri }}" alt="QR code สำหรับตั้งค่า Authenticator"></div>
+      <div class="secret-box"><small>SECRET KEY</small><code>{{ totp_secret }}</code></div>
+    {% else %}
+      <h1>กรอกรหัส 2FA</h1>
+      <p>เปิดแอป Authenticator ของบัญชี <strong>{{ account.username }}</strong> แล้วกรอกรหัสปัจจุบัน</p>
+    {% endif %}
+    <form action="/portal/two-factor" method="post" class="totp-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label class="field"><span>Authenticator Code</span><input name="code" inputmode="numeric" pattern="[0-9 ]{6,12}" maxlength="12" autocomplete="one-time-code" required autofocus placeholder="000000"></label>
+      <button class="button button-primary" type="submit">ยืนยันและเข้าสู่ระบบ</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}NT Drone Competition Portal{% endblock %}
+{% block content %}
+<section class="hero shell">
+  <div class="hero-copy">
+    <span class="eyebrow">COMPETITION OPERATIONS PLATFORM</span>
+    <h1>ระบบกลางสำหรับ<br><em>การแข่งขันโดรน</em></h1>
+    <p>จัดการตั้งแต่สมัครทีม ตรวจเอกสาร ยืนยันตัวตนด้วย 2FA จอง Slot เปิด VPN ตามเวลา ไปจนถึงควบคุม Simulation และดูผล Telemetry</p>
+    <div class="hero-actions">
+      <a class="button button-primary" href="/register">เริ่มสมัครทีม</a>
+      <a class="button button-secondary" href="/login">เข้าสู่ระบบ</a>
+    </div>
+    <div class="network-note"><span class="pulse-dot"></span><strong>Internal Network</strong> LAN 192.168.248.0/24</div>
+  </div>
+  <div class="hero-visual" aria-label="ภาพรวมระบบแข่งขันโดรน">
+    <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+    <div class="drone-card">
+      <svg viewBox="0 0 260 180" aria-hidden="true">
+        <g class="drone-svg">
+          <ellipse cx="54" cy="43" rx="43" ry="9"/><ellipse cx="206" cy="43" rx="43" ry="9"/>
+          <ellipse cx="54" cy="137" rx="43" ry="9"/><ellipse cx="206" cy="137" rx="43" ry="9"/>
+          <path d="M88 70 53 44M172 70l34-26M88 111l-34 26M172 111l34 26"/>
+          <path d="M91 67h78l25 23-25 24H91L66 90z"/>
+          <circle cx="130" cy="91" r="25"/><circle cx="130" cy="91" r="9"/>
+          <path d="M108 115l-15 29M152 115l15 29"/>
+        </g>
+      </svg>
+      <div class="telemetry-strip"><span>ALT 68.4 m</span><span>SPD 9.7 m/s</span><span>SIM READY</span></div>
+    </div>
+    <div class="floating-card float-a"><small>VPN ACCESS</small><strong>Time-based</strong></div>
+    <div class="floating-card float-b"><small>SIMULATION</small><strong>Telemetry Live</strong></div>
+    <div class="floating-card float-c"><small>SECURITY</small><strong>2FA Required</strong></div>
+  </div>
+</section>
+
+<section class="section shell">
+  <div class="section-heading">
+    <span class="eyebrow">USER JOURNEY</span>
+    <h2>การทำงานหลัก 6 ขั้นตอน</h2>
+    <p>สิทธิ์ทุกอย่างผูกกับทีม เวลา และสถานะการอนุมัติเพื่อลดการเปิดสิทธิ์ค้าง</p>
+  </div>
+  <div class="journey-grid">
+    {% set steps = [
+      ('01','สมัครทีม','กรอกข้อมูลทีมและแนบเอกสาร'),
+      ('02','Admin อนุมัติ','ตรวจข้อมูลก่อนเปิดสิทธิ์'),
+      ('03','Login + 2FA','Google Authenticator ทุกครั้ง'),
+      ('04','จอง Slot','กำหนดวัน เวลา และคิว'),
+      ('05','รับ VPN','เปิดเฉพาะเวลาที่จอง'),
+      ('06','Run SIM','ควบคุมและดู Telemetry')
+    ] %}
+    {% for number, title, detail in steps %}
+      <article class="journey-card"><span>{{ number }}</span><h3>{{ title }}</h3><p>{{ detail }}</p></article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section section-tinted">
+  <div class="shell feature-layout">
+    <div>
+      <span class="eyebrow">CONTROL PLANE</span>
+      <h2>Config → Server → SIM → Dashboard</h2>
+      <p>Simulation ถูกแยกเป็น Control Plane ชัดเจน รองรับ Start, Stop, Cancel พร้อมเก็บ Status, Metrics, Result และ Telemetry กลับมายัง Portal</p>
+    </div>
+    <div class="flow-line">
+      <div><span>01</span><strong>Config File</strong><small>Parameters</small></div>
+      <i>→</i><div><span>02</span><strong>Server / API</strong><small>Control</small></div>
+      <i>→</i><div><span>03</span><strong>Simulator</strong><small>Run Scenario</small></div>
+      <i>→</i><div><span>04</span><strong>Dashboard</strong><small>Result / Telemetry</small></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

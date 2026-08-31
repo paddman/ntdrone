@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Team Dashboard | NT Drone{% endblock %}
+{% block content %}
+<section class="dashboard-head">
+  <div class="shell dashboard-head-inner">
+    <div><span class="eyebrow">TEAM CONTROL CENTER</span><h1>{{ team.name if team else 'Team Dashboard' }}</h1><p>{{ team.code if team else '-' }} • {{ team.institution if team else '-' }}</p></div>
+    <div class="status-card"><small>TEAM STATUS</small><strong class="status status-{{ team.status|lower if team else 'pending' }}">{{ team.status if team else '-' }}</strong><span>{{ members|length }} / 4 Members</span></div>
+  </div>
+</section>
+
+<div class="shell dashboard-grid">
+  <section class="panel span-2">
+    <div class="panel-header"><div><span class="eyebrow">01 — TEAM PROFILE</span><h2>สมาชิกและสิทธิ์ใช้งาน</h2></div><span class="chip">Leader จัดการ • Member ใช้ VPN</span></div>
+    <div class="table-wrap"><table><thead><tr><th>ชื่อ</th><th>Username</th><th>E-mail</th><th>Role</th><th>2FA</th></tr></thead><tbody>{% for member in members %}<tr><td>{{ member.full_name }}</td><td><code>{{ member.username }}</code></td><td>{{ member.email }}</td><td><span class="status status-neutral">{{ member.role }}</span></td><td>{% if member.totp_enabled %}<span class="status status-approved">Enabled</span>{% else %}<span class="status status-pending">Setup required</span>{% endif %}</td></tr>{% else %}<tr><td colspan="5">ยังไม่มีสมาชิก</td></tr>{% endfor %}</tbody></table></div>
+    {% if user.role == 'TEAM_LEADER' and team.status == 'APPROVED' and members|length < 4 %}
+    <details class="form-disclosure"><summary>เพิ่มสมาชิกในทีม</summary><form action="/portal/members" method="post" class="form-grid compact-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label class="field"><span>ชื่อ–นามสกุล</span><input name="full_name" required></label><label class="field"><span>Username</span><input name="username" pattern="[A-Za-z0-9._-]+" required></label><label class="field"><span>E-mail</span><input type="email" name="email" required></label><label class="field"><span>เบอร์โทรศัพท์</span><input name="phone" required></label><label class="field field-wide"><span>รหัสผ่านเริ่มต้น</span><input type="password" name="password" minlength="12" required><small>สมาชิกต้องใช้รหัสนี้ Login และตั้งค่า 2FA</small></label><button class="button button-primary field-wide" type="submit">สร้างบัญชีสมาชิก</button></form></details>
+    {% endif %}
+  </section>
+
+  <section class="panel span-2">
+    <div class="panel-header"><div><span class="eyebrow">02 — BOOKING</span><h2>Slot สำหรับ Simulation</h2></div><span class="chip">Default 3 ชั่วโมง • Cooldown 5 นาที</span></div>
+    <div class="slot-grid">
+      {% for slot in slots %}
+      <article class="slot-card"><div><small>{{ slot.resource_key }}</small><h3>{{ slot.name }}</h3><p>{{ slot.starts_at|datetime_th }} น. • {{ slot.duration_minutes }} นาที</p></div><div class="slot-meta"><span>Capacity {{ slot.capacity }}</span>{% if user.role == 'TEAM_LEADER' %}<form action="/portal/bookings" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="slot_id" value="{{ slot.id }}"><button class="button button-secondary button-small" type="submit">จอง Slot</button></form>{% endif %}</div></article>
+      {% else %}<div class="empty-state">ยังไม่มี Slot ที่เปิดให้จอง</div>{% endfor %}
+    </div>
+    <h3 class="subheading">ประวัติ Booking</h3>
+    <div class="table-wrap"><table><thead><tr><th>Slot</th><th>เวลา</th><th>Status</th><th>Queue</th><th></th></tr></thead><tbody>{% for booking in bookings %}<tr><td>{{ booking.slot.name }}</td><td>{{ booking.slot.starts_at|datetime_th }}</td><td><span class="status status-{{ booking.status|lower }}">{{ booking.status }}</span></td><td>{{ booking.queue_position if booking.queue_position else '-' }}</td><td>{% if user.role == 'TEAM_LEADER' and booking.status in ['CONFIRMED','WAITLISTED'] %}<form action="/portal/bookings/{{ booking.id }}/cancel" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-danger button-small" type="submit" data-confirm="ยืนยันการยกเลิก Booking? ระบบจะติด Cooldown 5 นาที">ยกเลิก</button></form>{% endif %}</td></tr>{% else %}<tr><td colspan="5">ยังไม่มี Booking</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><span class="eyebrow">03 — VPN ACCESS</span><h2>Time-based VPN</h2></div>{% if vpn and vpn.enabled %}<span class="live-indicator">ACTIVE</span>{% else %}<span class="status status-neutral">DISABLED</span>{% endif %}</div>
+    {% if vpn %}<div class="vpn-card"><div class="vpn-icon">VPN</div><div><small>CLIENT ADDRESS</small><strong>{{ vpn.address }}</strong><p>ระบบเปิด Peer อัตโนมัติเฉพาะช่วง Booking ที่ยืนยันแล้ว และปิดเมื่อหมดเวลา</p></div></div><a class="button button-secondary full-width" href="/api/v1/vpn/config">ดาวน์โหลด WireGuard Config</a>{% else %}<div class="empty-state">VPN Key จะถูกสร้างหลัง Admin อนุมัติทีม</div>{% endif %}
+  </section>
+
+  <section class="panel">
+    <div class="panel-header"><div><span class="eyebrow">04 — CREATE RUN</span><h2>Simulation Config</h2></div><span class="chip">Standard / Blind</span></div>
+    <form action="/portal/simulations" method="post" class="stack-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label class="field"><span>Booking</span><select name="booking_id" required><option value="">เลือก Booking</option>{% for booking in bookings if booking.status == 'CONFIRMED' %}<option value="{{ booking.id }}">{{ booking.slot.name }} • {{ booking.slot.starts_at|datetime_th }}</option>{% endfor %}</select></label><div class="field-row"><label class="field"><span>Mode</span><select name="mode"><option value="STANDARD">STANDARD</option><option value="BLIND">BLIND</option></select></label><label class="field"><span>Scenario</span><input name="scenario_name" value="default" required></label></div><label class="field"><span>Config JSON</span><textarea name="config_json" rows="7">{
+  "mission": "waypoint-navigation",
+  "max_altitude_m": 120,
+  "timeout_seconds": 900
+}</textarea></label><button class="button button-primary" type="submit">บันทึก Simulation</button></form>
+  </section>
+
+  <section class="panel span-2">
+    <div class="panel-header"><div><span class="eyebrow">05 — SIMULATION</span><h2>Control & Telemetry</h2></div><span class="chip">Start • Stop • Cancel • Result</span></div>
+    <div class="run-grid">{% for run in runs %}<article class="run-card"><div class="run-card-top"><div><small>{{ run.mode }} • {{ run.booking.slot.name }}</small><h3>{{ run.scenario_name }}</h3></div><span class="status status-{{ run.status|lower }}">{{ run.status }}</span></div><div class="run-meta"><span>Created {{ run.created_at|datetime_th }}</span><span>Run ID <code>{{ run.id[:8] }}</code></span></div><div class="button-row">{% if run.status == 'READY' %}<form action="/portal/simulations/{{ run.id }}/start" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-primary button-small" type="submit">Start</button></form>{% endif %}{% if run.status in ['READY','QUEUED','RUNNING'] %}<form action="/portal/simulations/{{ run.id }}/stop" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-secondary button-small" type="submit">Stop</button></form><form action="/portal/simulations/{{ run.id }}/cancel" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="button button-danger button-small" type="submit">Cancel</button></form>{% endif %}</div><details><summary>Metrics / Result</summary><div class="code-grid"><div><small>METRICS</small><pre>{{ run.metrics_json|json_pretty }}</pre></div><div><small>RESULT</small><pre>{{ run.result_json|json_pretty }}</pre></div></div></details></article>{% else %}<div class="empty-state">ยังไม่มี Simulation Run</div>{% endfor %}</div>
+  </section>
+
+  <section class="panel span-2 feedback-panel"><div><span class="eyebrow">06 — FEEDBACK</span><h2>ข้อเสนอแนะหลังใช้งาน</h2><p>Feedback ถูกส่งต่อให้ Admin โดยไม่กระทบ Flow หลักของการแข่งขัน</p></div><form action="/portal/feedback" method="post" class="feedback-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label class="field"><span>คะแนน</span><select name="rating"><option value="5">5 — ดีมาก</option><option value="4">4 — ดี</option><option value="3">3 — พอใช้</option><option value="2">2 — ต้องปรับปรุง</option><option value="1">1 — มีปัญหา</option></select></label><label class="field grow"><span>รายละเอียด</span><input name="message" required placeholder="สิ่งที่พบหรือข้อเสนอแนะ"></label><button class="button button-secondary" type="submit">ส่ง Feedback</button></form></section>
+</div>
+{% endblock %}

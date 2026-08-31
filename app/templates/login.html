@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}เข้าสู่ระบบ | NT Drone{% endblock %}
+{% block content %}
+<section class="login-shell shell">
+  <div class="login-visual">
+    <span class="eyebrow">02 — SECURE LOGIN</span>
+    <h1>ยืนยันตัวตน<br>ทุกครั้งก่อนใช้งาน</h1>
+    <div class="security-stack"><div><b>1</b><span><strong>Username + Password</strong><small>ตรวจสอบบัญชีและสถานะทีม</small></span></div><div><b>2</b><span><strong>Authenticator 2FA</strong><small>รหัส TOTP 6 หลักทุก Login</small></span></div><div><b>3</b><span><strong>Role & Access</strong><small>สิทธิ์หัวหน้าทีม สมาชิก และ Admin</small></span></div></div>
+  </div>
+  <form class="panel login-form" action="/portal/login" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <span class="eyebrow">LOGIN</span><h2>Competition Portal</h2><p>ใช้บัญชีที่ได้รับอนุมัติแล้ว</p>
+    <label class="field"><span>Username</span><input name="username" required autocomplete="username" autofocus></label>
+    <label class="field"><span>Password</span><input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="button button-primary" type="submit">ดำเนินการต่อด้วย 2FA</button>
+    <small class="muted">บัญชียังไม่อนุมัติจะไม่สามารถเข้าสู่ระบบได้</small>
+  </form>
+</section>
+{% endblock %}
