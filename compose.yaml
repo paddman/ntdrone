@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ntdrone
+      POSTGRES_USER: ntdrone
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ntdrone-dev-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ntdrone -d ntdrone"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://ntdrone:${POSTGRES_PASSWORD:-ntdrone-dev-password}@db:5432/ntdrone
+      STORAGE_ROOT: /app/data
+    ports:
+      - "8000:8000"
+    volumes:
+      - portal_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://ntdrone:${POSTGRES_PASSWORD:-ntdrone-dev-password}@db:5432/ntdrone
+      STORAGE_ROOT: /app/data
+    volumes:
+      - portal_data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  portal_data:
