@@ -23,3 +23,9 @@ jobs:
         run: ruff check app tests scripts
       - name: Test
         run: pytest --cov=app --cov-report=term-missing
+      - name: Validate Compose
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+      - name: Build container image
+        run: docker build --tag ntdrone:test .
